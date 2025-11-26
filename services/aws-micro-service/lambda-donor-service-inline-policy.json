@@ -1,0 +1,72 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DynamoDBDonorAccess",
+            "Effect": "Allow",
+            "Action": "dynamodb:*",
+            "Resource": [
+                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/donor",
+                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/donation"
+            ]
+        },
+        {
+            "Sid": "SQSSendMessage",
+            "Effect": "Allow",
+            "Action": "sqs:SendMessage",
+            "Resource": "arn:aws:sqs:ap-northeast-2:436471025878:food-donor-match-queue-v1"
+        },
+        {
+            "Sid": "AthenaAccess",
+            "Effect": "Allow",
+            "Action": [
+                "athena:StartQueryExecution",
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+                "athena:BatchGetQueryExecution",
+                "athena:StopQueryExecution"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "GlueAccess",
+            "Effect": "Allow",
+            "Action": [
+                "glue:GetDatabase",
+                "glue:GetTable",
+                "glue:GetPartitions",
+                "glue:GetPartition"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3AccessAthenaResults",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:GetBucketAcl",
+                "s3:PutBucketAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::food-donor-athena-results-v1",
+                "arn:aws:s3:::food-donor-athena-results-v1/*"
+            ]
+        },
+        {
+            "Sid": "S3AccessProcessedData",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::food-donor-processed-data-v1",
+                "arn:aws:s3:::food-donor-processed-data-v1/*"
+            ]
+        }
+    ]
+}

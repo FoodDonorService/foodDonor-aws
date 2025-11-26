@@ -1,0 +1,40 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DynamoDBMatchAccess",
+            "Effect": "Allow",
+            "Action": "dynamodb:*",
+            "Resource": [
+                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/recipient",
+                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/task",
+                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/volunteer_match"
+            ]
+        },
+        {
+            "Sid": "BedrockInvokeAccess",
+            "Effect": "Allow",
+            "Action": "bedrock:InvokeModel",
+            "Resource": "*"
+        },
+        {
+            "Sid": "MarketplaceAccess",
+            "Effect": "Allow",
+            "Action": [
+                "aws-marketplace:ViewSubscriptions",
+                "aws-marketplace:Subscribe"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "SQSReceiveMessage",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+            ],
+            "Resource": "arn:aws:sqs:ap-northeast-2:436471025878:food-donor-match-queue-v1"
+        }
+    ]
+}

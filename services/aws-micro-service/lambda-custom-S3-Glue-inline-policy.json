@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "S3WriteAccessRaw",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::food-donor-raw-data-v1/*"
+            ]
+        },
+        {
+            "Sid": "GlueJobStartAccess",
+            "Effect": "Allow",
+            "Action": [
+                "glue:StartJobRun"
+            ],
+            "Resource": [
+                "arn:aws:glue:ap-northeast-2:436471025878:job/food-donor-ETL-job-v1"
+            ]
+        }
+    ]
+}

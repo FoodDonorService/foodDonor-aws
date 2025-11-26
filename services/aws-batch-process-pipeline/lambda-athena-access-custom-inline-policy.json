@@ -1,0 +1,55 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AthenaAccess",
+            "Effect": "Allow",
+            "Action": [
+                "athena:StartQueryExecution",
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults"
+            ],
+            "Resource": [
+                "arn:aws:athena:ap-northeast-2:436471025878:workgroup/primary"
+            ]
+        },
+        {
+            "Sid": "GlueAccess",
+            "Effect": "Allow",
+            "Action": [
+                "glue:GetDatabase",
+                "glue:GetTable"
+            ],
+            "Resource": [
+                "arn:aws:glue:ap-northeast-2:436471025878:catalog",
+                "arn:aws:glue:ap-northeast-2:436471025878:database/food_donor_db",
+                "arn:aws:glue:ap-northeast-2:436471025878:table/food_donor_db/restaurants"
+            ]
+        },
+        {
+            "Sid": "S3AccessProcessedData",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::food-donor-processed-data-v1",
+                "arn:aws:s3:::food-donor-processed-data-v1/*"
+            ]
+        },
+        {
+            "Sid": "S3AccessAthenaResults",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::food-donor-athena-results-v1",
+                "arn:aws:s3:::food-donor-athena-results-v1/*"
+            ]
+        }
+    ]
+}

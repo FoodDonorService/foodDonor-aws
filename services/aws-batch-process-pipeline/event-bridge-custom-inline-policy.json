@@ -1,0 +1,14 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Resource": [
+                "arn:aws:lambda:ap-northeast-2:436471025878:function:food-donor-ingest-trigger-v1"
+            ]
+        }
+    ]
+}

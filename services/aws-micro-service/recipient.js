@@ -4,16 +4,23 @@ import { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, ScanComm
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 import { randomUUID } from "crypto";
 // --- 클라이언트 초기화 ---
-const ddbClient = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
-const bedrockClient = new BedrockRuntimeClient({ region: "ap-northeast-2" });
+const requiredEnv = (name) => {
+    const value = process.env[name];
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return value;
+};
 
-// 환경 변수 (하드코딩)
-const MATCH_TABLE_NAME = "task";
-const RECIPIENT_TABLE_NAME = "recipient";
-const VOLUNTEER_MATCH_TABLE_NAME = "volunteer_match";
-const LLM_MODEL_ID = "anthropic.claude-3-haiku-20240307-v1:0";
-const AWS_REGION = "ap-northeast-2";
+const AWS_REGION = requiredEnv("AWS_REGION");
+const MATCH_TABLE_NAME = requiredEnv("MATCH_TABLE_NAME");
+const RECIPIENT_TABLE_NAME = requiredEnv("RECIPIENT_TABLE_NAME");
+const VOLUNTEER_MATCH_TABLE_NAME = requiredEnv("VOLUNTEER_MATCH_TABLE_NAME");
+const LLM_MODEL_ID = requiredEnv("LLM_MODEL_ID");
+
+const ddbClient = new DynamoDBClient({ region: AWS_REGION });
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+const bedrockClient = new BedrockRuntimeClient({ region: AWS_REGION });
 
 // 하버사인 공식을 사용한 거리 계산 (미터 단위)
 function calculateDistance(lat1, lon1, lat2, lon2) {

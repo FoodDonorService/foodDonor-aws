@@ -17,15 +17,15 @@
                 "s3:PutObject"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-athena-results-v1",
-                "arn:aws:s3:::food-donor-athena-results-v1/*"
+                "arn:aws:s3:::<ATHENA_RESULTS_BUCKET>",
+                "arn:aws:s3:::<ATHENA_RESULTS_BUCKET>/*"
             ],
             "Condition": {
                 "StringEquals": {
-                    "aws:SourceAccount": "436471025878"
+                    "aws:SourceAccount": "<AWS_ACCOUNT_ID>"
                 },
                 "ArnLike": {
-                    "aws:SourceArn": "arn:aws:athena:ap-northeast-2:436471025878:workgroup/*"
+                    "aws:SourceArn": "arn:aws:athena:ap-northeast-2:<AWS_ACCOUNT_ID>:workgroup/*"
                 }
             }
         }

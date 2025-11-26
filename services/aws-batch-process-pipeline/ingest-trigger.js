@@ -1,60 +1,26 @@
-// =======================
-//   [광진구 스케줄러 입력 예시]
-//   EventBridge 스케줄러의 입력(Input) 필드에 설정
-// =======================
-/*
-{
-  "district_name": "gwangjin",
-  "service_key": "564c47475864617434395a714b796f",
-  "api_endpoint": "LOCALDATA_072404_GJ"
-}
-"api_url": "http://openapi.seoul.go.kr:8088/564c47475864617434395a714b796f/json/LOCALDATA_072404_GJ/1/5/"
-*/
 
-// =======================
-//   [노원구 스케줄러 입력 예시]
-//   (※ 별도의 스케줄 생성, 동일 Lambda 지정)
-// =======================
-/*
-{
-  "district_name": "nowon",
-  "service_key": "704558565564617436336d6371504f",
-  "api_endpoint": "LOCALDATA_072404_NW"
-}
-"api_url": "http://openapi.seoul.go.kr:8088/704558565564617436336d6371504f/json/LOCALDATA_072404_NW/1/5/"
-*/
-
-// API 정보:
-// - 광진구: http://openapi.seoul.go.kr:8088/{인증키}/json/LOCALDATA_072404_GJ/1/5/
-// - 노원구: http://openapi.seoul.go.kr:8088/{인증키}/json/LOCALDATA_072404_NW/1/5/
-// 참고: 서울시 공공데이터 포털 (data.seoul.go.kr)
-
-/*
- * 이 코드는 Node.js 20.x 런타임에서 작동하며, 외부 라이브러리(npm install)가 필요 없습니다.
- * API 응답(JSON)을 1000건씩 스트리밍하여 S3에 작은 파일(_part_N.json)로 분할 저장합니다.
- * 메모리 사용량을 최소화하여 1GB가 넘는 데이터도 128MB 메모리로 처리할 수 있습니다.
- */
-
-/*
- * (최종 수정)
- * 'Unable to calculate hash' 오류를 해결하기 위해,
- * PutObjectCommand 대신 @aws-sdk/lib-storage의 'Upload' 클래스를 사용합니다.
- * 이 'Upload' 클래스도 Lambda 런타임에 기본 내장되어 있습니다.
- */
 import { S3Client } from '@aws-sdk/client-s3';
 import { GlueClient, StartJobRunCommand } from '@aws-sdk/client-glue';
 // PutObjectCommand 대신 lib-storage의 Upload를 임포트합니다.
 import { Upload } from "@aws-sdk/lib-storage";
 
-// --- 설정 (고정값) ---
-const S3_RAW_BUCKET = "food-donor-raw-data-v1";
-const GLUE_JOB_NAME = "food-donor-ETL-job-v1";
-const API_BASE_URL = "http://openapi.seoul.go.kr:8088";
+const requireEnv = (name, { optional = false, defaultValue } = {}) => {
+    const value = process.env[name] ?? defaultValue;
+    if (!value && !optional) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return value;
+};
+
+const AWS_REGION = requireEnv("AWS_REGION", { optional: true, defaultValue: "ap-northeast-2" });
+const S3_RAW_BUCKET = requireEnv("S3_RAW_BUCKET");
+const GLUE_JOB_NAME = requireEnv("GLUE_JOB_NAME");
+const API_BASE_URL = requireEnv("API_BASE_URL", { optional: true, defaultValue: "http://openapi.seoul.go.kr:8088" });
 const MAX_BATCH_SIZE = 1000;
 
 // AWS SDK 클라이언트 초기화
-const s3Client = new S3Client({ region: process.env.AWS_REGION || 'ap-northeast-2' });
-const glueClient = new GlueClient({ region: process.env.AWS_REGION || 'ap-northeast-2' });
+const s3Client = new S3Client({ region: AWS_REGION });
+const glueClient = new GlueClient({ region: AWS_REGION });
 
 export const handler = async (event, context) => {
     console.log('Event received:', JSON.stringify(event, null, 2));

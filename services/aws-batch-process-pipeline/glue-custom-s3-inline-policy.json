@@ -6,8 +6,8 @@
             "Effect": "Allow",
             "Action": "s3:ListBucket",
             "Resource": [
-                "arn:aws:s3:::food-donor-raw-data-v1",
-                "arn:aws:s3:::food-donor-processed-data-v1"
+                "arn:aws:s3:::<RAW_DATA_BUCKET>",
+                "arn:aws:s3:::<PROCESSED_DATA_BUCKET>"
             ]
         },
         {
@@ -17,7 +17,7 @@
                 "s3:GetObject"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-raw-data-v1/*"
+                "arn:aws:s3:::<RAW_DATA_BUCKET>/*"
             ]
         },
         {
@@ -28,7 +28,7 @@
                 "s3:DeleteObject"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-processed-data-v1/*"
+                "arn:aws:s3:::<PROCESSED_DATA_BUCKET>/*"
             ]
         }
     ]

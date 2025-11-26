@@ -5,20 +5,27 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { AthenaClient, StartQueryExecutionCommand, GetQueryExecutionCommand, GetQueryResultsCommand } from "@aws-sdk/client-athena";
 import { randomUUID } from "crypto"; // 내장 crypto 모듈에서 UUID 생성기 임포트
 
-// --- AWS 클라이언트 초기화 ---
-// 리전(region)은 Lambda 실행 환경에서 자동으로 설정됩니다.
-const ddbClient = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
-const sqsClient = new SQSClient({});
-const athenaClient = new AthenaClient({});
+const requiredEnv = (name, { optional = false, defaultValue } = {}) => {
+  const value = process.env[name] ?? defaultValue;
+  if (!value && !optional) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+};
 
-// --- 환경 변수 (하드코딩) ---
-const DONOR_PROFILE_TABLE = "donor"; // 기부자 = Restaurant이므로 이 테이블에 restaurants 정보 모두 저장
-const DONATION_TABLE = "donation";
-const DONATION_MATCH_QUEUE_URL = "https://sqs.ap-northeast-2.amazonaws.com/436471025878/food-donor-match-queue-v1"; // SQS 큐 URL
-const ATHENA_DATABASE = "food_donor_db"; // Athena 데이터베이스
-const ATHENA_WORKGROUP = "primary"; // Athena 워크그룹
-const ATHENA_OUTPUT_LOCATION = "s3://food-donor-athena-results-v1/"; // S3 출력 위치
+const AWS_REGION = requiredEnv("AWS_REGION");
+const DONOR_PROFILE_TABLE = requiredEnv("DONOR_PROFILE_TABLE");
+const DONATION_TABLE = requiredEnv("DONATION_TABLE");
+const DONATION_MATCH_QUEUE_URL = requiredEnv("DONATION_MATCH_QUEUE_URL");
+const ATHENA_DATABASE = requiredEnv("ATHENA_DATABASE");
+const ATHENA_WORKGROUP = requiredEnv("ATHENA_WORKGROUP", { optional: true, defaultValue: "primary" });
+const ATHENA_OUTPUT_LOCATION = requiredEnv("ATHENA_OUTPUT_LOCATION");
+
+// --- AWS 클라이언트 초기화 ---
+const ddbClient = new DynamoDBClient({ region: AWS_REGION });
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+const sqsClient = new SQSClient({ region: AWS_REGION });
+const athenaClient = new AthenaClient({ region: AWS_REGION });
 
 // === 1. 기부자 프로필 생성 (회원가입) ===
 // POST /donor/profile

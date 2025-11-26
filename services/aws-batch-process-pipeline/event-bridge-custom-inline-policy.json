@@ -7,7 +7,7 @@
                 "lambda:InvokeFunction"
             ],
             "Resource": [
-                "arn:aws:lambda:ap-northeast-2:436471025878:function:food-donor-ingest-trigger-v1"
+                "arn:aws:lambda:ap-northeast-2:<AWS_ACCOUNT_ID>:function:<INGEST_TRIGGER_FUNCTION>"
             ]
         }
     ]

@@ -6,15 +6,15 @@
             "Effect": "Allow",
             "Action": "dynamodb:*",
             "Resource": [
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/donor",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/donation"
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<DONOR_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<DONATION_TABLE_NAME>"
             ]
         },
         {
             "Sid": "SQSSendMessage",
             "Effect": "Allow",
             "Action": "sqs:SendMessage",
-            "Resource": "arn:aws:sqs:ap-northeast-2:436471025878:food-donor-match-queue-v1"
+            "Resource": "arn:aws:sqs:ap-northeast-2:<AWS_ACCOUNT_ID>:<MATCH_QUEUE_NAME>"
         },
         {
             "Sid": "AthenaAccess",
@@ -52,8 +52,8 @@
                 "s3:PutBucketAcl"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-athena-results-v1",
-                "arn:aws:s3:::food-donor-athena-results-v1/*"
+                "arn:aws:s3:::<ATHENA_RESULTS_BUCKET>",
+                "arn:aws:s3:::<ATHENA_RESULTS_BUCKET>/*"
             ]
         },
         {
@@ -64,8 +64,8 @@
                 "s3:ListBucket"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-processed-data-v1",
-                "arn:aws:s3:::food-donor-processed-data-v1/*"
+                "arn:aws:s3:::<PROCESSED_DATA_BUCKET>",
+                "arn:aws:s3:::<PROCESSED_DATA_BUCKET>/*"
             ]
         }
     ]

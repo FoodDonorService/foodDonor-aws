@@ -1,3 +1,4 @@
+import os
 import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
@@ -19,7 +20,9 @@ job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
 # --- 설정 ---
-S3_OUTPUT_BUCKET = "food-donor-processed-data-v1" # 처리된 데이터가 저장될 버킷
+S3_OUTPUT_BUCKET = os.environ.get("PROCESSED_DATA_BUCKET")
+if not S3_OUTPUT_BUCKET:
+    raise ValueError("Environment variable PROCESSED_DATA_BUCKET is required")
 INPUT_PATH = args['S3_INPUT_PATH'] # Lambda가 넘겨준 원본 파일 경로
 DISTRICT_NAME = args['DISTRICT_NAME'] # 구 이름 (예: "gwangjin", "nowon")
 EXECUTION_DATE = args['EXECUTION_DATE'] # 파티션 생성을 위한 날짜

@@ -1,7 +1,20 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 
-const client = new DynamoDBClient({});
+const requiredEnv = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+};
+
+const AWS_REGION = requiredEnv("AWS_REGION");
+const DONOR_TABLE_NAME = requiredEnv("DONOR_PROFILE_TABLE");
+const VOLUNTEER_TABLE_NAME = requiredEnv("VOLUNTEER_TABLE_NAME");
+const RECIPIENT_TABLE_NAME = requiredEnv("RECIPIENT_TABLE_NAME");
+
+const client = new DynamoDBClient({ region: AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
 
 // 공통 응답 포맷 (status, message, data)
@@ -44,9 +57,9 @@ export const handler = async (event) => {
 
     // 2. 3개 테이블 병렬 조회
     const [donorResult, volunteerResult, recipientResult] = await Promise.all([
-      findUserInTable("donor", "donor_id", cognitoId),
-      findUserInTable("volunteer", "volunteer_id", cognitoId),
-      findUserInTable("recipient", "recipient_id", cognitoId),
+      findUserInTable(DONOR_TABLE_NAME, "donor_id", cognitoId),
+      findUserInTable(VOLUNTEER_TABLE_NAME, "volunteer_id", cognitoId),
+      findUserInTable(RECIPIENT_TABLE_NAME, "recipient_id", cognitoId),
     ]);
 
     // 3. 결과 확인 및 역할 할당

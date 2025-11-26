@@ -6,8 +6,8 @@
             "Effect": "Allow",
             "Action": "dynamodb:*",
             "Resource": [
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/volunteer",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/volunteer_match"
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<VOLUNTEER_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<VOLUNTEER_TABLE_NAME>_match"
             ]
         }
     ]

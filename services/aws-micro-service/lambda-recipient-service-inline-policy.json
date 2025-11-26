@@ -6,9 +6,9 @@
             "Effect": "Allow",
             "Action": "dynamodb:*",
             "Resource": [
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/recipient",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/task",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/volunteer_match"
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<RECIPIENT_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<MATCH_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<VOLUNTEER_TABLE_NAME>_match"
             ]
         },
         {
@@ -34,7 +34,7 @@
                 "sqs:DeleteMessage",
                 "sqs:GetQueueAttributes"
             ],
-            "Resource": "arn:aws:sqs:ap-northeast-2:436471025878:food-donor-match-queue-v1"
+            "Resource": "arn:aws:sqs:ap-northeast-2:<AWS_ACCOUNT_ID>:<MATCH_QUEUE_NAME>"
         }
     ]
 }

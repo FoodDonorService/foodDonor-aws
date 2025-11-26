@@ -8,7 +8,7 @@
                 "s3:PutObject"
             ],
             "Resource": [
-                "arn:aws:s3:::food-donor-raw-data-v1/*"
+                "arn:aws:s3:::<RAW_DATA_BUCKET>/*"
             ]
         },
         {
@@ -18,7 +18,7 @@
                 "glue:StartJobRun"
             ],
             "Resource": [
-                "arn:aws:glue:ap-northeast-2:436471025878:job/food-donor-ETL-job-v1"
+                "arn:aws:glue:ap-northeast-2:<AWS_ACCOUNT_ID>:job/<GLUE_JOB_NAME>"
             ]
         }
     ]

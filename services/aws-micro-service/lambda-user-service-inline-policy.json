@@ -6,9 +6,9 @@
             "Effect": "Allow",
             "Action": "dynamodb:*",
             "Resource": [
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/donor",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/recipient",
-                "arn:aws:dynamodb:ap-northeast-2:436471025878:table/volunteer"
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<DONOR_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<RECIPIENT_TABLE_NAME>",
+                "arn:aws:dynamodb:ap-northeast-2:<AWS_ACCOUNT_ID>:table/<VOLUNTEER_TABLE_NAME>"
             ]
         }
     ]

@@ -1,12 +1,12 @@
 import * as https from 'https';
 import * as querystring from 'querystring';
 
-// --- NAVER API 설정 ---
-const NAVER_CLIENT_ID = "bu7Xaj9PGHtvCnLrdhqm";
-const NAVER_CLIENT_SECRET = "uVlUOVS6mH";
-const NAVER_LOCAL_SEARCH_URL_HOST = "openapi.naver.com";
-const NAVER_LOCAL_SEARCH_URL_PATH = "/v1/search/local.json";
-const DEFAULT_POST_NUMBER = "30303"; 
+// --- NAVER API 설정 (환경 변수에서 로드) ---
+const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
+const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
+const NAVER_LOCAL_SEARCH_URL_HOST = process.env.NAVER_LOCAL_SEARCH_URL_HOST ?? "openapi.naver.com";
+const NAVER_LOCAL_SEARCH_URL_PATH = process.env.NAVER_LOCAL_SEARCH_URL_PATH ?? "/v1/search/local.json";
+const DEFAULT_POST_NUMBER = process.env.DEFAULT_POST_NUMBER ?? "30303";
 
 // ... (removeHtmlTags 및 createErrorResponse 함수는 동일합니다.)
 
@@ -33,6 +33,10 @@ function createErrorResponse(statusCode, message, detail) {
  * AWS Lambda 메인 핸들러 함수 (ES Module export)
  */
 export const handler = async (event) => {
+    if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
+        console.error("NAVER API credentials missing. Set NAVER_CLIENT_ID and NAVER_CLIENT_SECRET.");
+        return createErrorResponse(500, "환경 변수 오류", "NAVER API 자격증명이 설정되지 않았습니다.");
+    }
     // 1. 'q' (검색어) 쿼리 파라미터 추출
     const queryParameters = event.queryStringParameters;
     

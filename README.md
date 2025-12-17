@@ -36,7 +36,6 @@ Food Donor Platform은 AWS 클라우드 서비스를 활용한 음식 기부 플
 ### 2.2 매치 시퀀스 다이어그램
 <img width="2022" height="1480" alt="image" src="https://github.com/user-attachments/assets/00352303-2045-4738-a106-008ef647b99f" />
 
-
 ---
 
 ## 3. 주요 서비스 구현
@@ -671,6 +670,8 @@ export const handler = async (event) => {
 ```javascript
 // ingest-trigger.js - handler 함수
 export const handler = async (event, context) => {
+  // service_key는 EventBridge 스케줄러의 입력으로 전달되며, 
+  // 실제 운영 환경에서는 AWS Secrets Manager나 환경 변수로 관리 권장
   const { district_name: DISTRICT, service_key: SERVICE_KEY, api_endpoint: API_ENDPOINT } = event;
   const today = new Date().toISOString().split('T')[0];
   const s3KeyPrefix = `raw_data/${DISTRICT}/${today}/`;
@@ -1005,9 +1006,9 @@ export const handler = async (event) => {
 ```javascript
 // cognito-config.js
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_4ZgEYdr40",
-  client_id: "habpk82kaa4ahe55a19jge98q",
-  redirect_uri: "https://food-donor-frontend-v1.s3-website.ap-northeast-2.amazonaws.com/",
+  authority: "https://cognito-idp.ap-northeast-2.amazonaws.com/{USER_POOL_ID}",
+  client_id: "{CLIENT_ID}", // 환경 변수로 관리 권장
+  redirect_uri: "{FRONTEND_URL}",
   response_type: "code",
   scope: "email openid phone",
 };
@@ -1016,6 +1017,7 @@ const cognitoAuthConfig = {
 **설명**:
 - Cognito User Pool을 사용하여 사용자 인증을 처리합니다.
 - OAuth 2.0 Authorization Code Flow를 사용합니다.
+- **보안 주의**: 실제 운영 환경에서는 User Pool ID와 Client ID를 환경 변수나 AWS Secrets Manager로 관리해야 합니다.
 
 ### 6.2 API Gateway Authorizer
 
@@ -1101,8 +1103,14 @@ if (!cognito_id || !email) {
 - Athena 쿼리 실행 권한
 - Bedrock 모델 호출 권한
 
-### A.2 환경 변수
-- 테이블명, 버킷명, 큐 URL 등은 하드코딩되어 있으나, 실제 운영 환경에서는 환경 변수로 관리하는 것을 권장합니다.
+### A.2 환경 변수 및 보안
+- **민감 정보 관리**: API 키, 시크릿, 인증 정보는 절대 소스코드에 하드코딩하지 않아야 합니다.
+- **권장 사항**:
+  - AWS Secrets Manager 또는 Systems Manager Parameter Store 사용
+  - Lambda 환경 변수 활용 (암호화된 변수 사용)
+  - 테이블명, 버킷명, 큐 URL 등도 환경 변수로 관리
+  - Cognito User Pool ID, Client ID 등은 환경 변수로 관리
+  - 네이버 API 키, 서울시 공공데이터 API 키 등은 Secrets Manager로 관리
 
 ---
 

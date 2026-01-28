@@ -114,7 +114,8 @@ terraform apply
 ## 2. 아키텍처 다이어그램
 
 ### 2.1 시스템 아키텍처
-<img width="1714" height="1718" alt="image" src="https://github.com/user-attachments/assets/45e5edee-c4b2-44df-bb73-fb5b94ba3ae1" />
+<img width="1313" height="873" alt="image" src="https://github.com/user-attachments/assets/9107f9c9-dc4c-43f3-a17b-be50ef8f950a" />
+
 
 ### 2.2 매치 시퀀스 다이어그램
 <img width="2022" height="1480" alt="image" src="https://github.com/user-attachments/assets/00352303-2045-4738-a106-008ef647b99f" />

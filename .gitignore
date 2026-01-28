@@ -1,22 +1,60 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+!terraform.tfvars.example
+!backend-config.hcl.example
+
+# IDE
 .DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
 .env
 .env.*
-*.pem
-*.key
-*.tfvars
-terraform.tfstate*
-.terraform/
-cdk.out/
-node_modules/
-venv/
 .envrc
-__pycache__/
-.pytest_cache/
+
+# Logs
 *.log
 logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
 dist/
 build/
-state/
-/.vscode/
-/.idea/
-docs/
+*.zip
+
+# Secrets
+*.pem
+*.key
+*.crt
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.backup.local.*
+
+# Documentation build
+docs/_build/

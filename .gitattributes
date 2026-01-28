@@ -1,0 +1,10 @@
+# Git attributes for better diff handling
+*.tf linguist-language=Terraform
+*.tfvars linguist-language=Terraform
+*.hcl linguist-language=Terraform
+
+# Markdown files
+*.md linguist-detectable=true
+
+# Shell scripts
+*.sh linguist-language=Shell

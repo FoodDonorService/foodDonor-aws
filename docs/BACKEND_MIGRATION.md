@@ -14,8 +14,7 @@
 ### 1. 현재 state 백업 (선택사항)
 
 ```bash
-cd food-donor-infra
-
+# 루트 디렉토리에서 실행
 # 현재 state 파일 백업
 cp terraform.tfstate terraform.tfstate.backup.local.$(date +%Y%m%d_%H%M%S)
 cp terraform.tfstate.backup terraform.tfstate.backup.backup.local.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true

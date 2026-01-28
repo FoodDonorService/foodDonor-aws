@@ -20,11 +20,11 @@ terraform version  # >= 1.0 필요
 
 ### 3. 소스 코드 파일 확인
 다음 파일들이 존재하는지 확인하세요:
-- `services/aws-micro-service/donor.mjs`
-- `services/aws-micro-service/recipient.mjs`
-- `services/aws-micro-service/user.mjs`
-- `services/aws-micro-service/volunteer.mjs`
-- `services/aws-micro-service/location.mjs`
+- `services/aws-micro-service/donor.js`
+- `services/aws-micro-service/recipient.js`
+- `services/aws-micro-service/user.js`
+- `services/aws-micro-service/volunteer.js`
+- `services/aws-micro-service/location.mjs` (ESM 모듈)
 - `services/aws-batch-process-pipeline/ingest-trigger.js`
 - `services/aws-batch-process-pipeline/glue-processor.py`
 
@@ -32,8 +32,8 @@ terraform version  # >= 1.0 필요
 
 ### Step 1: 변수 파일 생성
 ```bash
-cd food-donor-infra
-cp terraform.tfvars.example terraform.tfvars
+# 루트 디렉토리에서 실행
+cp examples/terraform.tfvars.example terraform.tfvars
 ```
 
 `terraform.tfvars` 파일을 편집하여 실제 값으로 수정:
@@ -78,11 +78,11 @@ terraform output
 
 ### Lambda Handler 설정
 Lambda 함수들이 단일 파일로 배포되므로, handler는 파일명에 맞게 설정되어 있습니다:
-- `donor.mjs` → handler: `donor.handler`
-- `recipient.mjs` → handler: `recipient.handler`
-- `user.mjs` → handler: `user.handler`
-- `volunteer.mjs` → handler: `volunteer.handler`
-- `location.mjs` → handler: `location.handler`
+- `donor.js` → handler: `donor.handler`
+- `recipient.js` → handler: `recipient.handler`
+- `user.js` → handler: `user.handler`
+- `volunteer.js` → handler: `volunteer.handler`
+- `location.mjs` → handler: `location.handler` (ESM 모듈)
 - `ingest-trigger.js` → handler: `ingest-trigger.handler`
 
 ### API Gateway 환경 변수 업데이트

@@ -1,7 +1,7 @@
 # 프로젝트 구조 (Project Structure)
 
 ```
-food-donor-infra/
+foodDonor-aws/                    # 루트 디렉토리
 ├── 📄 Core Terraform Files
 │   ├── main.tf                    # 루트 모듈 (전체 리소스 조립)
 │   ├── variables.tf               # 전역 변수 정의
@@ -24,7 +24,6 @@ food-donor-infra/
 │
 ├── 📖 Documentation
 │   └── docs/
-│       ├── README.md              # 문서 인덱스
 │       ├── DEPLOYMENT_GUIDE.md    # 배포 가이드
 │       ├── BACKEND_SETUP.md       # Backend 설정 가이드
 │       ├── BACKEND_MIGRATION.md    # Backend 마이그레이션 가이드
@@ -85,5 +84,5 @@ food-donor-infra/
 - **security**: IAM 역할/정책 및 Cognito User Pool
 
 ### Documentation
-모든 상세 문서는 `docs/` 폴더에 있습니다. [docs/README.md](docs/README.md)를 참고하세요.
+모든 상세 문서는 `docs/` 폴더에 있습니다. 각 문서는 특정 주제에 대한 상세 가이드를 제공합니다.
 

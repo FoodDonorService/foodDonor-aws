@@ -1,9 +1,0 @@
-# Backend Configuration File
-# Use with: terraform init -backend-config=backend-config.hcl
-# Copy this file to backend-config.hcl and update with your actual values
-
-bucket         = "food-donor-terraform-state-dev"
-key            = "terraform.tfstate"
-region         = "ap-northeast-2"
-encrypt        = true
-dynamodb_table = "food-donor-terraform-locks-dev"

@@ -13,8 +13,7 @@ Terraform state 파일을 S3에 저장하고 DynamoDB로 lock 관리를 설정�
 먼저 backend용 S3 bucket과 DynamoDB table을 생성합니다:
 
 ```bash
-cd food-donor-infra
-
+# 루트 디렉토리에서 실행
 # Backend 리소스만 먼저 생성
 terraform init
 terraform apply -target=module.storage.aws_s3_bucket.terraform_state \
@@ -26,7 +25,7 @@ terraform apply -target=module.storage.aws_s3_bucket.terraform_state \
 
 #### Step 2: Backend 설정 활성화
 
-`provider.tf` 파일에서 backend 설정의 주석을 해제하고 값 수정:
+`backend.tf` 파일에서 backend 설정 확인 및 수정:
 
 ```hcl
 backend "s3" {
@@ -38,26 +37,7 @@ backend "s3" {
 }
 ```
 
-또는 `terraform.tfvars`에서 변수로 설정:
-
-```hcl
-terraform_state_bucket_name = "terraform-state"
-terraform_lock_table_name   = "terraform-locks"
-```
-
-그리고 `provider.tf`를 다음과 같이 수정:
-
-```hcl
-backend "s3" {
-  bucket         = "${var.project_name}-${var.terraform_state_bucket_name}-${var.env}"
-  key            = "terraform.tfstate"
-  region         = var.aws_region
-  encrypt        = true
-  dynamodb_table = "${var.project_name}-${var.terraform_lock_table_name}-${var.env}"
-}
-```
-
-**주의**: Backend 설정에서는 변수를 직접 사용할 수 없습니다. `terraform init` 시 `-backend-config` 옵션을 사용하거나, `backend.tf` 파일을 별도로 만들어야 합니다.
+**참고**: Backend 설정은 `backend.tf` 파일에서 관리됩니다. 변수는 `terraform.tfvars`에서 설정하고, `terraform init` 시 `-backend-config` 옵션을 사용하거나 `backend-config.hcl` 파일을 사용할 수 있습니다.
 
 #### Step 3: Backend로 마이그레이션
 
@@ -81,7 +61,7 @@ terraform apply -target=module.storage.aws_s3_bucket.terraform_state \
 
 #### Step 2: Backend 설정 추가
 
-`provider.tf`에 backend 설정 추가 (위와 동일)
+`backend.tf` 파일에 backend 설정이 있는지 확인 (이미 생성되어 있음)
 
 #### Step 3: State 마이그레이션
 
@@ -91,23 +71,11 @@ terraform init -migrate-state
 
 ## Backend 설정 파일 (backend.tf) 사용 (권장)
 
-변수를 사용하려면 `backend.tf` 파일을 별도로 만들고 `terraform init` 시 설정을 전달합니다:
+현재 프로젝트는 `backend.tf` 파일을 사용합니다. 변수를 사용하려면 `terraform init` 시 설정을 전달합니다:
 
-### 1. backend.tf 파일 생성
+### 1. backend-config 파일 생성
 
-```hcl
-# backend.tf
-terraform {
-  backend "s3" {
-    # 이 값들은 terraform init 시 -backend-config로 전달됩니다
-    # 또는 backend-config 파일을 사용할 수 있습니다
-  }
-}
-```
-
-### 2. backend-config 파일 생성
-
-`backend-config.hcl` 파일 생성:
+`examples/backend-config.hcl.example`을 참고하여 `backend-config.hcl` 파일 생성:
 
 ```hcl
 bucket         = "food-donor-terraform-state-dev"
@@ -125,17 +93,7 @@ terraform init -backend-config=backend-config.hcl
 
 ## 자동화된 설정 (권장)
 
-`provider.tf`를 다음과 같이 수정하여 자동으로 backend를 설정할 수 있습니다:
-
-```hcl
-terraform {
-  backend "s3" {
-    # 값은 terraform init 시 -backend-config로 전달
-  }
-}
-```
-
-그리고 `terraform init` 시:
+현재 프로젝트는 `backend.tf` 파일을 사용합니다. `terraform init` 시:
 
 ```bash
 terraform init \

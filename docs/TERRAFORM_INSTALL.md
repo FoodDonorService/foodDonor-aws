@@ -91,7 +91,7 @@ source ~/.zshrc
 Terraform 설치가 완료되면:
 
 ```bash
-cd food-donor-infra
+# 루트 디렉토리에서 실행
 terraform init
 terraform plan
 terraform apply

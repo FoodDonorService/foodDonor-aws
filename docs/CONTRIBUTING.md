@@ -46,7 +46,7 @@ cat .gitignore
 
 ```bash
 # 1. 변수 파일 생성
-cp terraform.tfvars.example terraform.tfvars
+cp examples/terraform.tfvars.example terraform.tfvars
 # terraform.tfvars 편집
 
 # 2. Backend 마이그레이션
@@ -62,10 +62,10 @@ terraform init -migrate-state
 ```bash
 # 1. 저장소 클론
 git clone <repository-url>
-cd food-donor-infra
+cd foodDonor-aws
 
 # 2. 변수 파일 생성
-cp terraform.tfvars.example terraform.tfvars
+cp examples/terraform.tfvars.example terraform.tfvars
 # terraform.tfvars 편집
 
 # 3. Terraform 초기화

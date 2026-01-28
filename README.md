@@ -1,21 +1,79 @@
-# 클라우드 웹서비스 구현 보고서
-## Food Donor Platform - 음식 기부 플랫폼
+# Food Donor Platform - Infrastructure as Code
+
+> AWS 서버리스 아키텍처를 Terraform으로 관리하는 인프라 레포지토리
+
+## 📋 프로젝트 개요
+
+이 레포지토리는 **Food Donor Platform**의 AWS 인프라를 Terraform으로 정의하고 관리합니다. 다른 AWS 계정의 콘솔로 만든 레거시 인프라를 **Former2**로 리버스 엔지니어링한 후, 배포 가능한 Terraform 코드로 리팩토링했습니다.
+
+### 🎯 주요 특징
+
+- **Infrastructure as Code**: 모든 AWS 리소스를 Terraform으로 정의
+- **모듈화된 구조**: 재사용 가능한 모듈로 구성 (storage, database, compute, integration, security)
+- **서버리스 아키텍처**: Lambda, DynamoDB, S3, API Gateway 등 서버리스 서비스 활용
+- **State 관리**: S3 + DynamoDB Backend로 State 파일 관리 및 락킹
+- **로컬 소스 코드**: Lambda 함수 소스 코드를 로컬에서 관리 (`services/` 폴더)
+
+### 📦 레포지토리 구조
+
+이 레포지토리는 **인프라 코드**를 관리합니다. 애플리케이션 소스 코드는 현재 `services/` 폴더에 포함되어 있지만, **추후 별도 레포지토리로 분리하여 CI/CD 파이프라인을 구축할 예정**입니다.
+
+```
+foodDonor-aws/                    # 인프라 레포지토리 (현재)
+├── 📄 Terraform 인프라 파일
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── provider.tf
+│   └── backend.tf
+├── 📁 modules/                   # 재사용 가능한 모듈
+│   ├── storage/                  # S3 Buckets
+│   ├── database/                 # DynamoDB & Glue
+│   ├── compute/                  # Lambda Functions
+│   ├── integration/              # API Gateway & SQS
+│   └── security/                 # IAM & Cognito
+├── 📁 services/                  # Lambda 소스 코드 (추후 분리 예정)
+│   ├── aws-micro-service/
+│   ├── aws-batch-process-pipeline/
+│   └── aws-LLM+MCP-agent/
+├── 📁 docs/                      # 인프라 문서
+└── 📁 scripts/                   # 유틸리티 스크립트
+```
+
+### 🚀 빠른 시작
+
+```bash
+# 1. Terraform 초기화
+terraform init
+
+# 2. 배포 계획 확인
+terraform plan
+
+# 3. 인프라 배포
+terraform apply
+```
+
+자세한 배포 가이드는 [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md)를 참고하세요.
+
+### 🔮 향후 계획
+
+#### Phase 1: 레포지토리 분리 및 CI/CD 구축 (예정)
+- **레포지토리 분리**
+  - `foodDonor-aws` (현재): Terraform 인프라 코드만 관리
+  - `food-donor-services` (신규): Lambda 함수 소스 코드 관리
+- **GitHub Actions CI/CD 파이프라인**
+  - Lambda 함수 자동 배포 (코드 변경 시)
+  - Terraform 인프라 자동 배포 (인프라 변경 시)
+  - 환경별 배포 전략 (dev → staging → prod)
+  - 테스트 자동화 및 보안 스캔
+
+자세한 내용은 [CI/CD 구축 이슈](.github/ISSUE_TEMPLATE/cicd-pipeline-setup.md)를 참고하세요.
 
 ---
 
-## 1. 프로젝트 개요
+## 📚 인프라 아키텍처
 
-### 1.1 시스템 소개
-Food Donor Platform은 AWS 클라우드 서비스를 활용한 음식 기부 플랫폼입니다. 기부자(음식점), 자원봉사자, 수혜자를 연결하여 음식 낭비를 줄이고 사회적 가치를 창출하는 서비스입니다.
-
-### 1.2 주요 기능
-- **기부자 관리**: 음식점 프로필 생성 및 기부 품목 등록
-- **자원봉사자 관리**: 봉사자 프로필 생성 및 기부 목록 조회
-- **수혜자 매칭**: AI 기반 수혜자 추천 시스템
-- **데이터 파이프라인**: 서울시 공공데이터 수집 및 처리
-- **위치 기반 서비스**: 네이버 지도 API 연동
-
-### 1.3 기술 스택
+### 기술 스택
 - **컴퓨팅**: AWS Lambda (Serverless)
 - **데이터베이스**: Amazon DynamoDB
 - **스토리지**: Amazon S3
@@ -25,114 +83,45 @@ Food Donor Platform은 AWS 클라우드 서비스를 활용한 음식 기부 플
 - **인증**: Amazon Cognito
 - **API**: Amazon API Gateway
 
-### 1.4 프로젝트 구조
+### 프로젝트 구조 상세
 
-```
-foodDonor-aws/
-├── 📄 Terraform 인프라 파일 (루트)
-│   ├── main.tf                    # 루트 모듈 (전체 리소스 조립)
-│   ├── variables.tf               # 전역 변수 정의
-│   ├── outputs.tf                 # 최종 출력값
-│   ├── provider.tf                # AWS 프로바이더 설정
-│   ├── backend.tf                 # Terraform Backend 설정 (S3 + DynamoDB)
-│   ├── terraform.tfvars.example   # 변수 예시 파일
-│   └── README.md                  # Terraform 인프라 문서
-│
-├── 📁 modules/                     # 재사용 가능한 모듈
-│   ├── storage/                   # S3 Buckets (Backend 리소스 포함)
-│   ├── database/                  # DynamoDB Tables & Glue Jobs
-│   ├── compute/                   # Lambda Functions
-│   ├── integration/               # SQS & API Gateway
-│   └── security/                  # IAM Roles & Cognito
-│
-├── 📁 scripts/                     # 유틸리티 스크립트
-│   └── migrate-backend.sh         # Backend 마이그레이션 스크립트
-│
-├── 📁 examples/                    # 예시 설정 파일
-│   ├── backend.tf.example
-│   └── backend-config.hcl.example
-│
-├── 📁 docs/                        # 인프라 문서
-│   ├── README.md                   # 문서 인덱스
-│   ├── DEPLOYMENT_GUIDE.md        # 배포 가이드
-│   ├── BACKEND_SETUP.md           # Backend 설정 가이드
-│   ├── BACKEND_MIGRATION.md       # Backend 마이그레이션 가이드
-│   ├── GITHUB_SETUP.md            # GitHub 업로드 가이드
-│   ├── CONTRIBUTING.md            # 기여 가이드
-│   ├── PROJECT_STRUCTURE.md       # 프로젝트 구조 설명
-│   ├── REFACTORING_SUMMARY.md     # 리팩토링 요약
-│   └── TERRAFORM_INSTALL.md      # Terraform 설치 가이드
-│
-├── 📁 services/                    # Lambda 함수 소스 코드
-│   ├── 📁 aws-micro-service/       # 마이크로서비스 Lambda 함수들
-│   │   ├── donor.mjs              # 기부자 서비스
-│   │   ├── recipient.mjs          # 수혜자 서비스
-│   │   ├── volunteer.mjs          # 자원봉사자 서비스
-│   │   ├── user.mjs               # 사용자 서비스
-│   │   ├── location.mjs           # 위치 검색 서비스 (Naver API)
-│   │   └── cognito-config.js      # Cognito 설정
-│   │
-│   ├── 📁 aws-batch-process-pipeline/  # 데이터 파이프라인
-│   │   ├── ingest-trigger.js       # 데이터 수집 트리거 (Lambda)
-│   │   ├── glue-processor.py      # Glue ETL 작업 스크립트
-│   │   └── athena-setting.sql     # Athena 테이블 설정
-│   │
-│   └── 📁 aws-LLM+MCP-agent/       # AI/ML 서비스
-│       └── bedrock-claude3-haiku.js  # Bedrock LLM 테스트
-│
-└── 📄 README.md                    # 프로젝트 메인 문서 (이 파일)
-```
-
-#### 1.4.1 디렉토리 설명
+#### 디렉토리 설명
 
 **루트 디렉토리**: Infrastructure as Code (IaC)
 - Terraform을 사용한 AWS 리소스 정의 및 관리
 - 모듈화된 구조로 재사용성과 유지보수성 향상
 - S3 + DynamoDB Backend로 State 관리 및 락킹
-- 자세한 내용은 [`README.md`](README.md) (Terraform 인프라 문서) 참고
 
-**`services/`**: 애플리케이션 소스 코드
-- **`aws-micro-service/`**: 비즈니스 로직을 담당하는 Lambda 함수들
-  - `donor.mjs`: 기부자 프로필 관리, 기부 등록/조회
-  - `recipient.mjs`: 수혜자 프로필 관리, AI 기반 매칭 처리
-  - `volunteer.mjs`: 자원봉사자 프로필 관리, 봉사 내역 조회
-  - `user.mjs`: 사용자 역할 조회 (donor/volunteer/recipient)
-  - `location.mjs`: 네이버 지도 API 연동 위치 검색
-- **`aws-batch-process-pipeline/`**: 데이터 파이프라인
-  - `ingest-trigger.js`: 서울시 공공데이터 수집 및 S3 저장
-  - `glue-processor.py`: 데이터 정제 및 Parquet 변환
-  - `athena-setting.sql`: Athena 테이블 생성 스크립트
-- **`aws-LLM+MCP-agent/`**: AI/ML 서비스
-  - `bedrock-claude3-haiku.js`: Amazon Bedrock Claude 3 Haiku 모델 테스트
+**`modules/`**: 재사용 가능한 Terraform 모듈
+- `storage/`: S3 버킷 관리 (frontend, raw_data, processed_data, athena_results, terraform_state)
+- `database/`: DynamoDB 테이블 및 Glue ETL Job
+- `compute/`: Lambda 함수 정의 및 배포
+- `integration/`: API Gateway 및 SQS 큐
+- `security/`: IAM 역할/정책 및 Cognito User Pool
 
-#### 1.4.2 아키텍처 계층
+**`services/`**: Lambda 함수 소스 코드 (⚠️ 추후 별도 레포지토리로 분리 예정)
+- `aws-micro-service/`: 마이크로서비스 Lambda 함수들 (donor, recipient, volunteer, user, location)
+- `aws-batch-process-pipeline/`: 데이터 파이프라인 (ingest-trigger, glue-processor)
+- `aws-LLM+MCP-agent/`: AI/ML 서비스 (Bedrock LLM)
 
-1. **인프라 계층** (루트 디렉토리)
-   - AWS 리소스 정의 및 프로비저닝
-   - 네트워크, 보안, 스토리지, 컴퓨팅 리소스 관리
+**`docs/`**: 인프라 문서
+- 배포 가이드, Backend 설정, 프로젝트 구조 등
 
-2. **애플리케이션 계층** (`services/`)
-   - 비즈니스 로직 구현
-   - 마이크로서비스 아키텍처 패턴 적용
-
-3. **데이터 계층**
-   - DynamoDB: 사용자 데이터 및 트랜잭션 데이터
-   - S3: 원시 데이터 및 처리된 데이터
-   - Athena: 데이터 분석 및 쿼리
-
-4. **통합 계층**
-   - API Gateway: RESTful API 엔드포인트
-   - Cognito: 사용자 인증 및 권한 관리
-   - SQS: 비동기 메시징 및 작업 큐
+자세한 내용은 [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md)를 참고하세요.
 
 ---
 
-## 2. 아키텍처 개요
+## 2. 아키텍처 다이어그램
 
 ### 2.1 시스템 아키텍처
 <img width="1714" height="1718" alt="image" src="https://github.com/user-attachments/assets/45e5edee-c4b2-44df-bb73-fb5b94ba3ae1" />
 
-### 2.2 프로젝트 구조 상세
+### 2.2 매치 시퀀스 다이어그램
+<img width="2022" height="1480" alt="image" src="https://github.com/user-attachments/assets/00352303-2045-4738-a106-008ef647b99f" />
+
+---
+
+## 3. 인프라 구조 상세
 
 #### 2.2.1 인프라 구조 (Terraform) - 루트 디렉토리
 
@@ -170,14 +159,29 @@ SQS → Lambda (recipient-service) → Bedrock → DynamoDB
 5. 데이터 조회: donor-service → Athena → S3 (processed_data)
 ```
 
-### 2.3 매치 시퀀스 다이어그램
-<img width="2022" height="1480" alt="image" src="https://github.com/user-attachments/assets/00352303-2045-4738-a106-008ef647b99f" />
+### 3.1 모듈 구조
+
+**리소스 간 의존성**:
+```
+API Gateway → Lambda Functions → DynamoDB/S3/SQS
+Lambda Functions → IAM Roles → AWS Services
+Glue Job → S3 (raw_data) → S3 (processed_data) → Athena
+SQS → Lambda (recipient-service) → Bedrock → DynamoDB
+```
+
+**서비스별 책임**:
+- **donor-service**: 기부자 프로필 CRUD, 기부 등록/조회, Athena 쿼리
+- **recipient-service**: 수혜자 프로필 CRUD, SQS 트리거 처리, Bedrock LLM 매칭
+- **volunteer-service**: 자원봉사자 프로필 CRUD, 봉사 내역 조회
+- **user-service**: 사용자 역할 조회 (3개 테이블 병렬 조회)
+- **location-service**: 네이버 지도 API 프록시
+- **ingest-trigger**: EventBridge 스케줄러 트리거, 공공데이터 수집, Glue Job 실행
 
 ---
 
-## 3. 주요 서비스 구현
+## 4. 주요 서비스 구현 상세
 
-### 3.1 기부자 서비스 (Donor Service)
+### 4.1 기부자 서비스 (Donor Service)
 
 #### 3.1.1 개요
 기부자(음식점)의 프로필 생성, 기부 품목 등록, 기부 내역 조회 등의 기능을 제공합니다.
@@ -329,7 +333,7 @@ async function getDonationList(authorizerClaims) {
 
 ---
 
-### 3.2 수혜자 서비스 (Recipient Service)
+### 4.2 수혜자 서비스 (Recipient Service)
 
 #### 3.2.1 개요
 수혜자 프로필 관리 및 AI 기반 매칭 시스템을 제공합니다. SQS를 통한 비동기 매칭 처리와 Bedrock LLM을 활용한 수혜자 추천 기능을 포함합니다.
@@ -575,7 +579,7 @@ if (httpMethod === 'GET' && path.includes('/recipient/tasks/')) {
 
 ---
 
-### 3.3 자원봉사자 서비스 (Volunteer Service)
+### 4.3 자원봉사자 서비스 (Volunteer Service)
 
 #### 3.3.1 개요
 자원봉사자의 프로필 관리, 기부 목록 조회, 봉사 내역 조회 등의 기능을 제공합니다.
@@ -668,7 +672,7 @@ export const getTaskHistory = async (event) => {
 
 ---
 
-### 3.4 사용자 서비스 (User Service)
+### 4.4 사용자 서비스 (User Service)
 
 #### 3.4.1 개요
 Cognito 인증 정보를 기반으로 사용자의 역할(donor, volunteer, recipient)을 조회합니다.
@@ -724,7 +728,7 @@ export const handler = async (event) => {
 
 ---
 
-### 3.5 위치 서비스 (Location Service)
+### 4.5 위치 서비스 (Location Service)
 
 #### 3.5.1 개요
 네이버 지도 API를 연동하여 위치 검색 기능을 제공합니다.
@@ -795,9 +799,9 @@ export const handler = async (event) => {
 
 ---
 
-## 4. 데이터 파이프라인 구현
+## 5. 데이터 파이프라인 구현
 
-### 4.1 데이터 수집 (Ingest Trigger)
+### 5.1 데이터 수집 (Ingest Trigger)
 
 #### 4.1.1 개요
 서울시 공공데이터 포털 API에서 음식점 데이터를 수집하여 S3에 저장합니다.
@@ -878,7 +882,7 @@ export const handler = async (event, context) => {
 
 ---
 
-### 4.2 데이터 처리 (Glue ETL)
+### 5.2 데이터 처리 (Glue ETL)
 
 #### 4.2.1 개요
 AWS Glue를 사용하여 원본 데이터를 정제하고 Parquet 형식으로 변환하여 저장합니다.
@@ -970,7 +974,7 @@ job.commit()
 
 ---
 
-### 4.3 데이터 쿼리 (Athena)
+### 5.3 데이터 쿼리 (Athena)
 
 #### 4.3.1 개요
 Amazon Athena를 사용하여 S3에 저장된 데이터를 SQL로 쿼리합니다.
@@ -1081,9 +1085,9 @@ async function findAndSaveRestaurant(restaurantName) {
 
 ---
 
-## 5. AI/ML 서비스 구현
+## 6. AI/ML 서비스 구현
 
-### 5.1 Amazon Bedrock 연동
+### 6.1 Amazon Bedrock 연동
 
 #### 5.1.1 개요
 Amazon Bedrock의 Claude 3 Haiku 모델을 사용하여 수혜자 매칭 추천을 수행합니다.
@@ -1136,9 +1140,9 @@ export const handler = async (event) => {
 
 ---
 
-## 6. 인증 및 보안
+## 7. 인증 및 보안
 
-### 6.1 Amazon Cognito 설정
+### 7.1 Amazon Cognito 설정
 
 ```javascript
 // cognito-config.js
@@ -1156,7 +1160,7 @@ const cognitoAuthConfig = {
 - OAuth 2.0 Authorization Code Flow를 사용합니다.
 - **보안 주의**: 실제 운영 환경에서는 User Pool ID와 Client ID를 환경 변수나 AWS Secrets Manager로 관리해야 합니다.
 
-### 6.2 API Gateway Authorizer
+### 7.2 API Gateway Authorizer
 
 모든 Lambda 함수에서 Cognito JWT 토큰을 검증합니다:
 
@@ -1177,9 +1181,9 @@ if (!cognito_id || !email) {
 
 ---
 
-## 7. 데이터베이스 설계
+## 8. 데이터베이스 설계
 
-### 7.1 DynamoDB 테이블 구조
+### 8.1 DynamoDB 테이블 구조
 
 #### 7.1.1 주요 테이블
 - **donor**: 기부자 프로필 (PK: donor_id)
@@ -1189,7 +1193,7 @@ if (!cognito_id || !email) {
 - **task**: 매칭 작업 (PK: task_id)
 - **volunteer_match**: 봉사자-수혜자 매칭 (PK: match_id, GSI: volunteer_id-index)
 
-### 7.2 데이터 흐름
+### 8.2 데이터 흐름
 
 1. **기부 등록**: donor → donation 테이블에 저장
 2. **매칭 요청**: donation → SQS → task 테이블 (PROCESSING)
@@ -1198,57 +1202,54 @@ if (!cognito_id || !email) {
 
 ---
 
-## 8. 성능 최적화
+## 9. 성능 최적화
 
-### 8.1 비동기 처리
+### 9.1 비동기 처리
 - SQS를 사용하여 매칭 작업을 비동기로 처리하여 API 응답 시간을 단축합니다.
 
-### 8.2 데이터 파티셔닝
+### 9.2 데이터 파티셔닝
 - Athena 테이블을 날짜와 구 이름으로 파티셔닝하여 쿼리 성능을 향상시킵니다.
 
-### 8.3 Parquet 형식 사용
+### 9.3 Parquet 형식 사용
 - Glue ETL에서 Parquet 형식으로 저장하여 스토리지 비용과 쿼리 성능을 최적화합니다.
 
-### 8.4 GSI 활용
+### 9.4 GSI 활용
 - DynamoDB GSI를 활용하여 다양한 쿼리 패턴을 지원합니다.
 
 ---
 
-## 9. 결론
+## 10. 배포 및 관리
 
-### 9.1 구현 성과
-- **서버리스 아키텍처**: Lambda를 활용하여 확장 가능하고 비용 효율적인 시스템 구축
-- **AI 기반 매칭**: Bedrock LLM을 활용하여 알레르기 정보 등을 고려한 지능형 매칭 구현
-- **데이터 파이프라인**: 공공데이터를 자동으로 수집, 처리, 저장하는 파이프라인 구축
-- **마이크로서비스**: 역할별로 분리된 서비스로 유지보수성 향상
+### 10.1 인프라 배포
+```bash
+# 루트 디렉토리에서 실행
+terraform init
+terraform plan
+terraform apply
+```
 
-### 9.2 향후 개선 사항
+자세한 배포 가이드는 [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md)를 참고하세요.
 
-#### Phase 1: CI/CD 구축 (예정)
-- **레포지토리 분리**: `services/` 폴더를 별도 레포지토리로 분리
-  - 인프라 레포지토리 (`foodDonor-aws`): Terraform 코드만 관리
-  - 서비스 레포지토리 (`food-donor-services`): Lambda 함수 소스 코드 관리
-- **GitHub Actions 파이프라인 구축**
-  - Lambda 함수 자동 배포 (코드 변경 시)
-  - Terraform 인프라 자동 배포 (인프라 변경 시)
-  - 환경별 배포 전략 (dev → staging → prod)
-  - 테스트 자동화 및 보안 스캔
-- **배포 프로세스 자동화**
-  - PR 생성 시 자동 테스트 실행
-  - Plan 결과 자동 리뷰
-  - 승인 후 자동 배포
+### 10.2 Lambda 함수 업데이트
+Lambda 함수 소스 코드를 수정한 후:
+1. 코드 변경사항 커밋
+2. `terraform apply` 실행 (자동으로 zip 파일 생성 및 업로드)
+3. Lambda 함수 자동 업데이트
 
-자세한 내용은 [CI/CD 구축 이슈](.github/ISSUE_TEMPLATE/cicd-pipeline-setup.md) 참고
+**소스 코드 경로**: `services/aws-micro-service/*.js` → Terraform이 자동으로 패키징
 
-#### Phase 2: 기능 개선
-- 실시간 알림 기능 추가 (SNS, SES)
-- 대시보드 구축 (CloudWatch, QuickSight)
-- 모니터링 및 로깅 강화
-- 성능 테스트 및 최적화
+### 10.3 State 관리
+- **Backend**: S3 + DynamoDB로 State 파일 관리
+- **락킹**: DynamoDB로 동시 작업 방지
+- **버전 관리**: S3 버전 관리 활성화
+
+자세한 내용은 [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md)를 참고하세요.
 
 ---
 
-## 부록: 주요 설정 파일
+---
+
+## 부록: 주요 설정 및 참고 자료
 
 ### A.1 프로젝트 구조 요약
 
@@ -1296,32 +1297,13 @@ if (!cognito_id || !email) {
 
 **환경 변수 설정 위치**: `modules/compute/lambda.tf`의 `environment` 블록
 
-### A.4 배포 및 관리
+### A.4 문서 가이드
 
-#### A.4.1 인프라 배포
-```bash
-# 루트 디렉토리에서 실행
-terraform init
-terraform plan
-terraform apply
-```
-
-자세한 배포 가이드는 [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) 참고
-
-#### A.4.2 Lambda 함수 업데이트
-Lambda 함수 소스 코드를 수정한 후:
-1. 코드 변경사항 커밋
-2. `terraform apply` 실행 (자동으로 zip 파일 생성 및 업로드)
-3. Lambda 함수 자동 업데이트
-
-**소스 코드 경로**: `services/aws-micro-service/*.mjs` → Terraform이 자동으로 패키징
-
-#### A.4.3 State 관리
-- **Backend**: S3 + DynamoDB로 State 파일 관리
-- **락킹**: DynamoDB로 동시 작업 방지
-- **버전 관리**: S3 버전 관리 활성화
-
-자세한 내용은 [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md) 참고
+- [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md): 배포 가이드
+- [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md): Backend 설정 가이드
+- [`docs/BACKEND_MIGRATION.md`](docs/BACKEND_MIGRATION.md): Backend 마이그레이션 가이드
+- [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md): 프로젝트 구조 설명
+- [`docs/REFACTORING_SUMMARY.md`](docs/REFACTORING_SUMMARY.md): 리팩토링 요약
 
 ---
 

@@ -21,7 +21,7 @@
      - `recipient-service` → `services/aws-micro-service/recipient.js`
      - `user-service` → `services/aws-micro-service/user.js`
      - `volunteer-service` → `services/aws-micro-service/volunteer.js`
-     - `location-service` → `services/aws-micro-service/location.mjs`
+     - `location-service` → `services/aws-micro-service/location.mjs` (ESM 모듈)
      - `ingest-trigger` → `services/aws-batch-process-pipeline/ingest-trigger.js`
    - `source_code_hash` 사용으로 코드 변경 시에만 배포
 
@@ -49,7 +49,7 @@
 ## 📁 생성된 파일 구조
 
 ```
-food-donor-infra/
+foodDonor-aws/                    # 루트 디렉토리
 ├── main.tf              # 루트 모듈 (모든 모듈 조립)
 ├── variables.tf          # 전역 변수
 ├── outputs.tf            # 최종 출력값
@@ -92,7 +92,7 @@ food-donor-infra/
      - `services/aws-micro-service/recipient.js`
      - `services/aws-micro-service/user.js`
      - `services/aws-micro-service/volunteer.js`
-     - `services/aws-micro-service/location.mjs`
+     - `services/aws-micro-service/location.mjs` (ESM 모듈)
      - `services/aws-batch-process-pipeline/ingest-trigger.js`
 
 2. **Glue 스크립트 파일 필요**
